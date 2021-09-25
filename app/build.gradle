@@ -7,7 +7,7 @@ android {
     buildToolsVersion "30.0.3"
 
     defaultConfig {
-        applicationId "io.github.lsposed.disableflagsecure"
+        applicationId "com.berdik.universal_audio_capture_enabler"
         minSdkVersion 21
         targetSdkVersion 30
         versionCode 2
