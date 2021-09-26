@@ -12,22 +12,23 @@ public class AudioCaptureEnabler implements IXposedHookLoadPackage {
 
     @Override
     public void handleLoadPackage(XC_LoadPackage.LoadPackageParam loadPackageParam) {
-        if (loadPackageParam.packageName.equals("android")) {
+        // Filter by package names with "android" in them and limit hooking to Android 11.
+        if (loadPackageParam.packageName.equals("android") &&
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+
+            // Bypass "allowAudioPlaybackCapture" in AndroidManifest.xml
+            // https://cs.android.com/android/platform/superproject/+/master:frameworks/
+            //  base/core/java/android/content/pm/parsing/ParsingPackageImpl.java;l=2539?
+            //  q=setAllowAudioPlaybackCapture
             try {
-                Class<?> windowsState = XposedHelpers.findClass("com.android.server.wm.WindowState", loadPackageParam.classLoader);
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                    XposedHelpers.findAndHookMethod(
-                            windowsState,
-                            "isSecureLocked",
-                            XC_MethodReplacement.returnConstant(false));
-                } else {
-                    XposedHelpers.findAndHookMethod(
-                            "com.android.server.wm.WindowManagerService",
-                            loadPackageParam.classLoader,
-                            "isSecureLocked",
-                            windowsState,
-                            XC_MethodReplacement.returnConstant(false));
-                }
+                Class<?> parsingPkgImpl = XposedHelpers.findClass(
+                        "android.content.pm.parsing.ParsingPackageImpl",
+                        loadPackageParam.classLoader);
+
+                XposedHelpers.findAndHookMethod(
+                        parsingPkgImpl,
+                        "setAllowAudioPlaybackCapture",
+                        XC_MethodReplacement.returnConstant(true));
             } catch (Throwable t) {
                 XposedBridge.log(t);
             }
