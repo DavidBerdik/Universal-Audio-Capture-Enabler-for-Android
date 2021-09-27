@@ -9,6 +9,7 @@ import de.robv.android.xposed.XposedHelpers;
 import de.robv.android.xposed.callbacks.XC_LoadPackage;
 
 public class AudioCaptureEnabler implements IXposedHookLoadPackage {
+    // Useful Reference: https://developer.android.com/guide/topics/media/av-capture
 
     @Override
     public void handleLoadPackage(XC_LoadPackage.LoadPackageParam loadPackageParam) {
