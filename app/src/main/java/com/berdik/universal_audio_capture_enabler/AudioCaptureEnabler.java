@@ -19,8 +19,7 @@ public class AudioCaptureEnabler implements IXposedHookLoadPackage {
 
             // Bypass "allowAudioPlaybackCapture" in AndroidManifest.xml
             /* https://cs.android.com/android/platform/superproject/+/master:frameworks/
-                base/core/java/android/content/pm/parsing/ParsingPackageImpl.java;l=2539?
-                q=setAllowAudioPlaybackCapture */
+                base/core/java/android/content/pm/parsing/ParsingPackageImpl.java;l=2539 */
             try {
                 Class<?> parsingPkgImpl = XposedHelpers.findClass(
                         "android.content.pm.parsing.ParsingPackageImpl",
