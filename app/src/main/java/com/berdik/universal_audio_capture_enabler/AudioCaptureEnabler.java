@@ -39,12 +39,32 @@ public class AudioCaptureEnabler implements IXposedHookLoadPackage {
             /* https://cs.android.com/android/platform/superproject/+/master:frameworks/base/media/
                 java/android/media/AudioManager.java;l=1554?q=setAllowedCapturePolicy&start=11 */
             try {
-                //
                 Class<?> audioManager = XposedHelpers.findClass(
                         "android.media.AudioManager", loadPackageParam.classLoader);
 
                 XposedHelpers.findAndHookMethod(
                         audioManager,
+                        "setAllowedCapturePolicy",
+                        new XC_MethodHook() {
+                            @Override
+                            protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+                                param.args[0] = AudioAttributes.ALLOW_CAPTURE_BY_ALL;
+                            }
+                        });
+            } catch (Throwable t) {
+                XposedBridge.log(t);
+            }
+
+            // Bypass AudioAttributes.Builder's "setAllowedCapturePolicy()"
+            /* https://cs.android.com/android/platform/superproject/+/master:frameworks/base/media/
+                java/android/media/AudioAttributes.java;l=879 */
+            try {
+                Class<?> audioAttribBuilder = XposedHelpers.findClass(
+                        "android.media.AudioAttributes.Builder",
+                        loadPackageParam.classLoader);
+
+                XposedHelpers.findAndHookMethod(
+                        audioAttribBuilder,
                         "setAllowedCapturePolicy",
                         new XC_MethodHook() {
                             @Override
