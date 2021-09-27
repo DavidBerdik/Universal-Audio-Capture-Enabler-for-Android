@@ -1,8 +1,10 @@
 package com.berdik.universal_audio_capture_enabler;
 
+import android.media.AudioAttributes;
 import android.os.Build;
 
 import de.robv.android.xposed.IXposedHookLoadPackage;
+import de.robv.android.xposed.XC_MethodHook;
 import de.robv.android.xposed.XC_MethodReplacement;
 import de.robv.android.xposed.XposedBridge;
 import de.robv.android.xposed.XposedHelpers;
@@ -29,6 +31,27 @@ public class AudioCaptureEnabler implements IXposedHookLoadPackage {
                         parsingPkgImpl,
                         "setAllowAudioPlaybackCapture",
                         XC_MethodReplacement.returnConstant(true));
+            } catch (Throwable t) {
+                XposedBridge.log(t);
+            }
+
+            // Bypass AudioManager's "setAllowedCapturePolicy()"
+            /* https://cs.android.com/android/platform/superproject/+/master:frameworks/base/media/
+                java/android/media/AudioManager.java;l=1554?q=setAllowedCapturePolicy&start=11 */
+            try {
+                //
+                Class<?> audioManager = XposedHelpers.findClass(
+                        "android.media.AudioManager", loadPackageParam.classLoader);
+
+                XposedHelpers.findAndHookMethod(
+                        audioManager,
+                        "setAllowedCapturePolicy",
+                        new XC_MethodHook() {
+                            @Override
+                            protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+                                param.args[0] = AudioAttributes.ALLOW_CAPTURE_BY_ALL;
+                            }
+                        });
             } catch (Throwable t) {
                 XposedBridge.log(t);
             }
